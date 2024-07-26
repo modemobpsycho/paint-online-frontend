@@ -16,20 +16,39 @@ import Eraser from '../../tools/Eraser'
 import Line from '../../tools/Line'
 
 export default function Toolbar() {
-	const { setTool } = useToolStore(state => state)
-	const { canvas } = useCanvasStore(state => state)
+	const { setTool, setFillColor } = useToolStore(state => state)
+	const { canvas, redo, undo, socket, sessionId } = useCanvasStore(
+		state => state
+	)
+
+	const colorHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setFillColor(e.target.value)
+	}
+
+	const download = () => {
+		const dataUrl = canvas!.toDataURL()
+		const a = document.createElement('a')
+		a.href = dataUrl
+		a.download = sessionId + '.jpg'
+		document.body.appendChild(a)
+		a.click()
+		document.body.removeChild(a)
+	}
 
 	return (
 		<div className='toolbar'>
 			<button
 				className='toolbar__button'
-				onClick={() => setTool(new Brush(canvas!))}
+				onClick={() => {
+					console.log('clicked', canvas, socket, sessionId)
+					setTool(new Brush(canvas!, socket!, sessionId))
+				}}
 			>
 				<BrushIcon />
 			</button>
 			<button
 				className='toolbar__button'
-				onClick={() => setTool(new Rect(canvas!))}
+				onClick={() => setTool(new Rect(canvas!, socket!, sessionId))}
 			>
 				<BoxIcon />
 			</button>
@@ -54,14 +73,23 @@ export default function Toolbar() {
 			<input
 				style={{ width: '30px', height: '30px', marginLeft: '10px' }}
 				type='color'
+				onChange={event => colorHandler(event)}
 			/>
-			<button className='toolbar__button' style={{ marginLeft: 'auto' }}>
+			<button
+				className='toolbar__button'
+				style={{ marginLeft: 'auto' }}
+				onClick={() => undo()}
+			>
 				<UndoIcon />
 			</button>
-			<button className='toolbar__button'>
+			<button className='toolbar__button' onClick={() => redo()}>
 				<RedoIcon />
 			</button>
-			<button className='toolbar__button' style={{ marginRight: '10px' }}>
+			<button
+				className='toolbar__button'
+				style={{ marginRight: '10px' }}
+				onClick={() => download()}
+			>
 				<SaveIcon />
 			</button>
 		</div>

@@ -1,8 +1,12 @@
+import { Socket } from 'socket.io-client'
 import Tool from './Tool'
 
 export default class Rect extends Tool {
-	constructor(canvas: HTMLCanvasElement) {
-		super(canvas)
+	declare width: number
+	declare height: number
+
+	constructor(canvas: HTMLCanvasElement, socket: Socket, sessionId: string) {
+		super(canvas, socket, sessionId)
 		this.listen()
 	}
 
@@ -14,6 +18,18 @@ export default class Rect extends Tool {
 
 	mouseUpHandler() {
 		this.mouseDown = false
+		this.socket.emit('draw', {
+			method: 'draw',
+			id: this.sessionId,
+			figure: {
+				type: 'rect',
+				x: this.startX,
+				y: this.startY,
+				width: this.width,
+				height: this.height,
+				color: this.ctx!.fillStyle,
+			},
+		})
 	}
 	mouseDownHandler(event: MouseEvent) {
 		this.mouseDown = true
@@ -26,9 +42,9 @@ export default class Rect extends Tool {
 		if (this.mouseDown) {
 			const currentX = event.pageX - (event.target as HTMLElement).offsetLeft
 			const currentY = event.pageY - (event.target as HTMLElement).offsetTop
-			const width = currentX - this.startX
-			const height = currentY - this.startY
-			this.draw(this.startX, this.startY, width, height)
+			this.width = currentX - this.startX
+			this.height = currentY - this.startY
+			this.draw(this.startX, this.startY, this.width, this.height)
 		}
 	}
 
@@ -43,5 +59,20 @@ export default class Rect extends Tool {
 			this.ctx!.fill()
 			this.ctx!.stroke()
 		}
+	}
+
+	static staticDraw(
+		ctx: CanvasRenderingContext2D,
+		x: number,
+		y: number,
+		w: number,
+		h: number,
+		color: string
+	) {
+		ctx!.fillStyle = color
+		ctx!.beginPath()
+		ctx!.rect(x, y, w, h)
+		ctx!.fill()
+		ctx!.stroke()
 	}
 }
