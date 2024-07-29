@@ -1,37 +1,41 @@
 @import './variables.scss';
 
 .toolbar {
-	height: $toolbar-height;
-	background-color: white;
-	display: flex;
-	align-items: center;
-	position: absolute;
-	width: 100%;
-	box-shadow: 0 4px 5px gray;
-	z-index: 999;
+    height: $toolbar-height;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    position: absolute;
+    width: 100%;
+    box-shadow: 0 4px 5px gray;
 
-	&__button {
-		height: $toolbar-height;
-		width: $toolbar-height;
-		background-color: transparent;
-		margin-left: 10px;
-		border: none;
-		outline: none;
-		cursor: pointer;
-		&:hover {
-			background-color: #e1e1e1;
-			transition: 0.3s;
-		}
-	}
+    border-bottom: 1px solid $primary-color;
+    z-index: 999;
+
+    &__button {
+        height: $toolbar-height;
+        width: $toolbar-height;
+        background-color: transparent;
+        margin-left: 10px;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        &:hover {
+            background-color: gray;
+            transition: 0.3s;
+        }
+    }
 }
 
 .setting-bar {
-	height: $toolbar-height;
-	background-color: white;
-	display: flex;
-	align-items: center;
-	position: absolute;
-	width: 100%;
-	box-shadow: 0 4px 5px gray;
-	top: $toolbar-height;
+    height: $toolbar-height;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    position: absolute;
+    width: 100%;
+    box-shadow: 0 4px 5px gray;
+    top: $toolbar-height;
+    z-index: 998;
+    border-bottom: 1px solid $primary-color;
 }

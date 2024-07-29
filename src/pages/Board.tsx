@@ -1,15 +1,15 @@
-import Canvas from '../components/Canvas/Canvas'
-import SettingBar from '../components/SettingBar/SettingBar'
-import Toolbar from '../components/Toolbar/Toolbar'
+import Canvas from '../components/Canvas/Canvas';
+import SettingBar from '../components/SettingBar/SettingBar';
+import Toolbar from '../components/Toolbar/Toolbar';
 
 function Board() {
-	return (
-		<>
-			<Toolbar />
-			<SettingBar />
-			<Canvas />
-		</>
-	)
+    return (
+        <>
+            <Toolbar />
+            <SettingBar />
+            <Canvas />
+        </>
+    );
 }
 
-export default Board
+export default Board;

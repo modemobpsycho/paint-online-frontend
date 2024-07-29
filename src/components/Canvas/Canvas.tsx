@@ -1,119 +1,87 @@
-import { useEffect, useRef } from 'react'
-import useCanvasStore from '../../stores/canvasStore'
-import { useToolStore } from '../../stores/toolStore'
-import './canvas.scss'
-import Brush from '../../tools/Brush'
-import { Button, Modal } from 'react-bootstrap'
-import { Input, InputLabel } from '@mui/material'
-import { useParams } from 'react-router-dom'
-import io from 'socket.io-client'
-import Rect from '../../tools/Rect'
+import { useEffect, useRef, useState } from 'react';
+import useCanvasStore from '../../stores/canvasStore';
+import { useToolStore } from '../../stores/toolStore';
+import './canvas.scss';
+import Brush from '../../tools/Brush';
+import { useParams } from 'react-router-dom';
+import Rect from '../../tools/Rect';
 
 export default function Canvas() {
-	const {
-		setCanvas,
-		modal,
-		setModal,
-		setUser,
-		pushToUndo,
-		user,
-		setSocket,
-		socket,
-		setSessionId,
-	} = useCanvasStore(state => state)
-	const { setTool } = useToolStore(state => state)
-	const canvasRef = useRef<HTMLCanvasElement>(null)
-	const params = useParams()
+    const { setCanvas, pushToUndo, user, socket, setSessionId, getBoard } = useCanvasStore((state) => state);
+    const { setTool, tool } = useToolStore((state) => state);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const params = useParams();
+    const [canvasSize, setCanvasSize] = useState({
+        width: window.innerWidth,
+        height: window.innerHeight - 80
+    });
 
-	useEffect(() => {
-		if (canvasRef.current) {
-			setCanvas(canvasRef.current)
-		}
+    useEffect(() => {
+        if (canvasRef.current) {
+            setCanvas(canvasRef.current);
+        }
 
-		const socket = io('http://localhost:3000')
+        setSessionId(params.id!);
+        // setBoard(params.id!);
 
-		setTool(new Brush(canvasRef.current!, socket, params.id!))
-		setSessionId(params.id!)
+        window.addEventListener('resize', () => {
+            setCanvasSize({ width: window.innerWidth, height: window.innerHeight - 80 });
+        });
 
-		socket.on('userJoined', message => {
-			console.log(message)
-		})
+        getBoard();
+        setTool(new Brush(canvasRef.current!, socket, params.id!));
 
-		socket.on('connect', () => {
-			console.log('connected1111111')
-		})
+        connectionHandler();
+    }, []);
 
-		socket.on('draw', message => {
-			drawHandler(message)
-		})
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const drawHandler = (msg: { figure: any }) => {
+        const figure = msg.figure;
+        const ctx = canvasRef.current!.getContext('2d');
+        switch (figure.type) {
+            case 'brush':
+                Brush.draw(ctx!, figure.x, figure.y);
+                break;
+            case 'rect':
+                Rect.staticDraw(ctx!, figure.x, figure.y, figure.width, figure.height, figure.color);
+                break;
+            case 'finish':
+                ctx!.beginPath();
+                break;
+        }
+    };
 
-		socket.connect()
-		setSocket(socket)
-	}, [])
+    const mouseDownHandler = () => {
+        pushToUndo(canvasRef.current!.toDataURL());
+    };
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const drawHandler = (msg: { figure: any }) => {
-		const figure = msg.figure
-		const ctx = canvasRef.current!.getContext('2d')
-		switch (figure.type) {
-			case 'brush':
-				Brush.draw(ctx!, figure.x, figure.y)
-				break
-			case 'rect':
-				Rect.staticDraw(
-					ctx!,
-					figure.x,
-					figure.y,
-					figure.width,
-					figure.height,
-					figure.color
-				)
-				break
-			case 'finish':
-				ctx!.beginPath()
-				break
-		}
-	}
+    const connectionHandler = () => {
+        socket.on('userJoined', (message) => {
+            console.log(message);
+        });
 
-	const mouseDownHandler = () => {
-		pushToUndo(canvasRef.current!.toDataURL())
-	}
+        socket.on('connect', () => {
+            console.log('connected');
+        });
 
-	const connectionHandler = () => {
-		if (user && socket) {
-			socket.emit('joinRoom', { roomId: params.id, username: user })
-		}
+        socket.on('draw', (message) => {
+            drawHandler(message);
+        });
 
-		setModal(false)
-	}
+        if (user && socket) {
+            socket.emit('joinRoom', { roomId: params.id, username: user });
+        }
+    };
 
-	return (
-		<div className='canvas'>
-			<Modal show={modal} onHide={() => {}}>
-				<Modal.Header closeButton>
-					<Modal.Title>BOO!</Modal.Title>
-				</Modal.Header>
-				<Modal.Body>
-					<InputLabel>Enter your pretty name!</InputLabel>
-					<Input
-						type='text'
-						onChange={e => {
-							setUser(e.target.value)
-						}}
-					/>
-				</Modal.Body>
-				<Modal.Footer>
-					<Button variant='secondary' onClick={() => connectionHandler()}>
-						Join
-					</Button>
-				</Modal.Footer>
-			</Modal>
-			<canvas
-				onMouseDown={() => mouseDownHandler()}
-				ref={canvasRef}
-				width={800}
-				height={500}
-			/>
-		</div>
-	)
+    return (
+        <div className="canvas">
+            <canvas
+                onMouseLeave={tool ? () => tool.mouseUpHandler() : undefined}
+                onMouseDown={mouseDownHandler}
+                ref={canvasRef}
+                width={canvasSize.width}
+                height={canvasSize.height}
+            />
+        </div>
+    );
 }
