@@ -2,6 +2,10 @@ import { Socket } from 'socket.io-client';
 import Tool from './Tool';
 
 export default class Circle extends Tool {
+    declare width: number;
+    declare height: number;
+    declare r: number;
+
     constructor(canvas: HTMLCanvasElement, socket: Socket, sessionId: string) {
         super(canvas, socket, sessionId);
         this.listen();
@@ -15,6 +19,19 @@ export default class Circle extends Tool {
 
     mouseUpHandler() {
         super.mouseUpHandler();
+        this.socket.emit('draw', {
+            method: 'draw',
+            id: this.sessionId,
+            figure: {
+                type: 'circle',
+                x: this.startX,
+                y: this.startY,
+                radius: Math.sqrt(Math.pow(this.width, 2) + Math.pow(this.height, 2)),
+                colorFill: this.ctx!.fillStyle,
+                colorStroke: this.ctx!.strokeStyle,
+                lineWidth: this.ctx!.lineWidth
+            }
+        });
     }
     mouseDownHandler(event: MouseEvent) {
         this.mouseDown = true;
@@ -28,10 +45,10 @@ export default class Circle extends Tool {
         if (this.mouseDown) {
             const currentX = event.pageX - (event.target as HTMLElement).offsetLeft;
             const currentY = event.pageY - (event.target as HTMLElement).offsetTop;
-            const width = currentX - this.startX;
-            const height = currentY - this.startY;
-            const r = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
-            this.draw(this.startX, this.startY, r);
+            this.width = currentX - this.startX;
+            this.height = currentY - this.startY;
+            this.r = Math.sqrt(Math.pow(this.width, 2) + Math.pow(this.height, 2));
+            this.draw(this.startX, this.startY, this.r);
         }
     }
 
@@ -46,5 +63,23 @@ export default class Circle extends Tool {
             this.ctx!.fill();
             this.ctx!.stroke();
         };
+    }
+
+    static staticDraw(
+        ctx: CanvasRenderingContext2D,
+        x: number,
+        y: number,
+        r: number,
+        colorStroke: string,
+        colorFill: string,
+        lineWidth: number
+    ) {
+        ctx!.lineWidth = lineWidth;
+        ctx!.strokeStyle = colorStroke;
+        ctx!.fillStyle = colorFill;
+        ctx!.beginPath();
+        ctx!.arc(x, y, r, 0, 2 * Math.PI);
+        ctx!.fill();
+        ctx!.stroke();
     }
 }

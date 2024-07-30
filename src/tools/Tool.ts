@@ -19,6 +19,7 @@ export default class Tool implements ITool {
         this.socket = socket;
         this.sessionId = sessionId;
         this.ctx = canvas.getContext('2d');
+        this.ctx!.lineCap = 'round';
         this.destroyEvents();
     }
 

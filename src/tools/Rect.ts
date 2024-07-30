@@ -27,7 +27,9 @@ export default class Rect extends Tool {
                 y: this.startY,
                 width: this.width,
                 height: this.height,
-                color: this.ctx!.fillStyle
+                colorFill: this.ctx!.fillStyle,
+                colorStroke: this.ctx!.strokeStyle,
+                lineWidth: this.ctx!.lineWidth
             }
         });
     }
@@ -61,8 +63,19 @@ export default class Rect extends Tool {
         };
     }
 
-    static staticDraw(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, color: string) {
-        ctx!.fillStyle = color;
+    static staticDraw(
+        ctx: CanvasRenderingContext2D,
+        x: number,
+        y: number,
+        w: number,
+        h: number,
+        colorFill: string,
+        colorStroke: string,
+        lineWidth: number
+    ) {
+        ctx!.lineWidth = lineWidth;
+        ctx!.fillStyle = colorFill;
+        ctx!.strokeStyle = colorStroke;
         ctx!.beginPath();
         ctx!.rect(x, y, w, h);
         ctx!.fill();

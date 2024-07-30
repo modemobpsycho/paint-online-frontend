@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import IBoard from '../types/board.interface';
 import axios from 'axios';
 import { API_URL } from '../helpers/constants';
+import { IDrawing } from '../types/drawing.interface';
 
 interface CanvasState {
     canvas: HTMLCanvasElement | null;
@@ -13,15 +14,26 @@ interface CanvasState {
     isUsernameModal: boolean;
     isBoardModal: boolean;
     user: string;
+    currentBoardUsers: string[];
     socket: Socket;
     sessionId: string;
     boards: IBoard[];
+    drawings: IDrawing[];
+    setDrawings: () => void;
+    addDrawing: (drawing: IDrawing) => void;
+    deleteDrawing: (id: number) => void;
+    getDrawing: (id: number) => void;
+    deleteAllDrawings: () => void;
+
     undo: () => void;
     redo: () => void;
     setBoardNameAdd: (board: string) => void;
     setIsUsernameModal: (isUsernameModal: boolean) => void;
     setIsBoardModal: (isBoardModal: boolean) => void;
     setUser: (username: string) => void;
+    setCurrentBoardUsers: (user: string) => void;
+    deleteCurrentBoardUsers: (userName: string) => void;
+    leaveBoard: () => void;
     setSocket: (socket: Socket) => void;
     setSessionId: (sessionId: string) => void;
     setCanvas: (canvas: HTMLCanvasElement) => void;
@@ -77,6 +89,65 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     isBoardModal: false,
     setIsBoardModal: (isBoardModal) => set({ isBoardModal }),
     user: localStorage.getItem('username') || '',
+    currentBoardUsers: [],
+    setCurrentBoardUsers: (user: string) => {
+        if (get().currentBoardUsers.includes(user) == false) {
+            set((state) => ({ currentBoardUsers: [...state.currentBoardUsers, user] }));
+        }
+    },
+    deleteCurrentBoardUsers: (userName) => {
+        set({ currentBoardUsers: get().currentBoardUsers.filter((user) => user !== userName) });
+    },
+    leaveBoard: () => {
+        set({ currentBoardUsers: [] });
+    },
+    drawings: [],
+    setDrawings: async () => {
+        try {
+            if (get().user) {
+                const response = await axios.get(API_URL + '/drawing/' + get().user);
+                const data = await response.data;
+                set({ drawings: data });
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    },
+    addDrawing: async (drawing: IDrawing) => {
+        try {
+            const response = await axios.post(API_URL + '/drawing' + get().board, {
+                id: drawing.id,
+                type: drawing.type,
+                lineWidth: drawing.lineWidth,
+                strokeColor: drawing.strokeColor,
+                fillColor: drawing.fillColor,
+                posX: drawing.posX,
+                posY: drawing.posY,
+                username: drawing.username
+            });
+            get()
+                .boards.find((board) => board.id === get().board?.id)
+                ?.drawings.push(response.data);
+        } catch (error) {
+            console.log(error);
+        }
+
+        set((state) => ({ drawings: [...state.drawings, drawing] }));
+    },
+    deleteDrawing: (id) => {
+        set((state) => ({ drawings: state.drawings.filter((drawing) => drawing.id !== id) }));
+    },
+    getDrawing: (id) => {
+        set((state) => ({ drawings: state.drawings.filter((drawing) => drawing.id === id) }));
+    },
+    deleteAllDrawings: () => {
+        try {
+            axios.delete(API_URL + '/drawing/' + get().user);
+            set({ drawings: [] });
+        } catch (error) {
+            console.log(error);
+        }
+    },
     setUser: (username) => {
         set({ user: username });
         localStorage.setItem('username', username);

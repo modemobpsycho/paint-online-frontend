@@ -2,7 +2,7 @@ import Canvas from '../components/Canvas/Canvas';
 import SettingBar from '../components/SettingBar/SettingBar';
 import Toolbar from '../components/Toolbar/Toolbar';
 
-function Board() {
+function CanvasPage() {
     return (
         <>
             <Toolbar />
@@ -12,4 +12,4 @@ function Board() {
     );
 }
 
-export default Board;
+export default CanvasPage;

@@ -19,6 +19,17 @@ export default class Line extends Tool {
 
     mouseUpHandler() {
         super.mouseUpHandler();
+        this.socket.emit('draw', {
+            method: 'draw',
+            id: this.sessionId,
+            figure: {
+                type: 'line',
+                x: this.currentX,
+                y: this.currentY,
+                color: this.ctx!.strokeStyle,
+                lineWidth: this.ctx!.lineWidth
+            }
+        });
     }
     mouseDownHandler(event: MouseEvent) {
         this.mouseDown = true;
@@ -48,5 +59,12 @@ export default class Line extends Tool {
             this.ctx!.lineTo(x, y);
             this.ctx!.stroke();
         };
+    }
+
+    static staticDraw(ctx: CanvasRenderingContext2D, x: number, y: number, color: string, lineWidth: number) {
+        ctx!.lineWidth = lineWidth;
+        ctx!.strokeStyle = color;
+        ctx!.lineTo(x, y);
+        ctx!.stroke();
     }
 }

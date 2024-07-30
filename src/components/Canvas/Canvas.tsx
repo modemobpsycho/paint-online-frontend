@@ -5,6 +5,9 @@ import './canvas.scss';
 import Brush from '../../tools/Brush';
 import { useParams } from 'react-router-dom';
 import Rect from '../../tools/Rect';
+import Circle from '../../tools/Circle';
+import Line from '../../tools/Line';
+import Eraser from '../../tools/Eraser';
 
 export default function Canvas() {
     const { setCanvas, pushToUndo, user, socket, setSessionId, getBoard } = useCanvasStore((state) => state);
@@ -22,28 +25,60 @@ export default function Canvas() {
         }
 
         setSessionId(params.id!);
-        // setBoard(params.id!);
+
+        getBoard();
+
+        setTool(new Brush(canvasRef.current!, socket, params.id!));
+
+        connectionHandler();
 
         window.addEventListener('resize', () => {
             setCanvasSize({ width: window.innerWidth, height: window.innerHeight - 80 });
         });
-
-        getBoard();
-        setTool(new Brush(canvasRef.current!, socket, params.id!));
-
-        connectionHandler();
+        return () => {
+            window.removeEventListener('resize', () => {
+                setCanvasSize({ width: window.innerWidth, height: window.innerHeight - 80 });
+            });
+        };
     }, []);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const drawHandler = (msg: { figure: any }) => {
         const figure = msg.figure;
-        const ctx = canvasRef.current!.getContext('2d');
+        const ctx = canvasRef.current?.getContext('2d');
+        
         switch (figure.type) {
             case 'brush':
-                Brush.draw(ctx!, figure.x, figure.y);
+                Brush.staticDraw(ctx!, figure.x, figure.y, figure.color, figure.width, figure.lineCap);
                 break;
             case 'rect':
-                Rect.staticDraw(ctx!, figure.x, figure.y, figure.width, figure.height, figure.color);
+                Rect.staticDraw(
+                    ctx!,
+                    figure.x,
+                    figure.y,
+                    figure.width,
+                    figure.height,
+                    figure.colorFill,
+                    figure.colorStroke,
+                    figure.lineWidth
+                );
+                break;
+            case 'circle':
+                Circle.staticDraw(
+                    ctx!,
+                    figure.x,
+                    figure.y,
+                    figure.radius,
+                    figure.colorStroke,
+                    figure.colorFill,
+                    figure.lineWidth
+                );
+                break;
+            case 'line':
+                Line.staticDraw(ctx!, figure.x, figure.y, figure.colorFill, figure.colorStroke);
+                break;
+            case 'eraser':
+                Eraser.staticDraw(ctx!, figure.x, figure.y, figure.width, figure.colorStroke);
                 break;
             case 'finish':
                 ctx!.beginPath();
@@ -71,6 +106,14 @@ export default function Canvas() {
         if (user && socket) {
             socket.emit('joinRoom', { roomId: params.id, username: user });
         }
+
+        socket.on('userLeft', (message) => {
+            console.log(message);
+        });
+
+        socket.on('disconnect', () => {
+            console.log('disconnected');
+        });
     };
 
     return (

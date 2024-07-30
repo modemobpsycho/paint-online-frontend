@@ -2,7 +2,7 @@ import '../../styles/header.scss';
 import BrushIcon from '@mui/icons-material/Brush';
 import BoxIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CircleIcon from '@mui/icons-material/RadioButtonUnchecked';
-import EraserIcon from '@mui/icons-material/AutoFixHigh';
+import EditIcon from '@mui/icons-material/Edit';
 import LineIcon from '@mui/icons-material/ShowChart';
 import UndoIcon from '@mui/icons-material/UndoOutlined';
 import HomeIcon from '@mui/icons-material/Home';
@@ -49,18 +49,24 @@ export default function Toolbar() {
             >
                 <BrushIcon />
             </button>
-            <button className="toolbar__button" onClick={() => setTool(new Rect(canvas!, socket!, sessionId))}>
+            <button
+                className="toolbar__button"
+                onClick={() => {
+                    setTool(new Rect(canvas!, socket!, sessionId));
+                }}
+            >
                 <BoxIcon />
             </button>
             <button className="toolbar__button" onClick={() => setTool(new Circle(canvas!, socket!, sessionId))}>
                 <CircleIcon />
             </button>
             <button className="toolbar__button" onClick={() => setTool(new Eraser(canvas!, socket!, sessionId))}>
-                <EraserIcon />
+                <EditIcon />
             </button>
             <button className="toolbar__button" onClick={() => setTool(new Line(canvas!, socket!, sessionId))}>
                 <LineIcon />
             </button>
+
             <input
                 style={{ width: '30px', height: '30px', marginLeft: '10px' }}
                 type="color"

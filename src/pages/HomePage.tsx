@@ -1,7 +1,7 @@
 import { Box, Button, Typography } from '@mui/material';
 import '../styles/home.scss';
 
-function Home() {
+function HomePage() {
     return (
         <Box
             sx={{
@@ -51,4 +51,4 @@ function Home() {
     );
 }
 
-export default Home;
+export default HomePage;
