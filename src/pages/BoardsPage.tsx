@@ -12,6 +12,7 @@ function BoardsPage() {
         isUsernameModal,
         setIsUsernameModal,
         setUser,
+        setUsername,
         isBoardModal,
         setIsBoardModal,
         boardNameAdd,
@@ -38,8 +39,11 @@ function BoardsPage() {
                     message: 'Enter your pretty name here!',
                     value: user
                 }}
-                onChange={(e) => setUser(e.target.value)}
-                onClick={() => setIsUsernameModal(false)}
+                onChange={(e) => setUsername(e.target.value)}
+                onClick={() => {
+                    setIsUsernameModal(false);
+                    setUser();
+                }}
             />
             <Modal
                 isCloseButton={true}

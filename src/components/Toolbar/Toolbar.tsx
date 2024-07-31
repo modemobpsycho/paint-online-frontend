@@ -16,15 +16,12 @@ import Circle from '../../tools/Circle';
 import Eraser from '../../tools/Eraser';
 import Line from '../../tools/Line';
 import { useNavigate } from 'react-router-dom';
+import ITool from '../../types/tool.interface';
 
 export default function Toolbar() {
     const { setTool, setFillColor } = useToolStore((state) => state);
     const { canvas, redo, undo, socket, sessionId } = useCanvasStore((state) => state);
     const navigate = useNavigate();
-
-    const colorHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFillColor(e.target.value);
-    };
 
     const download = () => {
         const dataUrl = canvas!.toDataURL();
@@ -44,7 +41,7 @@ export default function Toolbar() {
             <button
                 className="toolbar__button"
                 onClick={() => {
-                    setTool(new Brush(canvas!, socket!, sessionId));
+                    setTool(new Brush(canvas!, socket!, sessionId) as ITool);
                 }}
             >
                 <BrushIcon />
@@ -52,26 +49,33 @@ export default function Toolbar() {
             <button
                 className="toolbar__button"
                 onClick={() => {
-                    setTool(new Rect(canvas!, socket!, sessionId));
+                    setTool(new Rect(canvas!, socket!, sessionId) as ITool);
                 }}
             >
                 <BoxIcon />
             </button>
-            <button className="toolbar__button" onClick={() => setTool(new Circle(canvas!, socket!, sessionId))}>
+            <button
+                className="toolbar__button"
+                onClick={() => setTool(new Circle(canvas!, socket!, sessionId) as ITool)}
+            >
                 <CircleIcon />
             </button>
-            <button className="toolbar__button" onClick={() => setTool(new Eraser(canvas!, socket!, sessionId))}>
+            <button
+                className="toolbar__button"
+                onClick={() => setTool(new Eraser(canvas!, socket!, sessionId) as ITool)}
+            >
                 <EditIcon />
             </button>
-            <button className="toolbar__button" onClick={() => setTool(new Line(canvas!, socket!, sessionId))}>
+            <button className="toolbar__button" onClick={() => setTool(new Line(canvas!, socket!, sessionId) as ITool)}>
                 <LineIcon />
             </button>
 
             <input
                 style={{ width: '30px', height: '30px', marginLeft: '10px' }}
                 type="color"
-                onChange={(event) => colorHandler(event)}
+                onChange={(event) => setFillColor(event.target.value)}
             />
+
             <button className="toolbar__button" style={{ marginLeft: 'auto' }} onClick={() => undo()}>
                 <UndoIcon />
             </button>

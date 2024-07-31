@@ -2,69 +2,77 @@ import { Socket } from 'socket.io-client';
 import Tool from './Tool';
 
 export default class Line extends Tool {
-    name: string;
-    currentX!: number;
-    currentY!: number;
+    static startX: number;
+    static startY: number;
+    static endX: number;
+    static endY: number;
     constructor(canvas: HTMLCanvasElement, socket: Socket, sessionId: string) {
         super(canvas, socket, sessionId);
-        this.listen();
-        this.name = 'Line';
+        Line.listen();
     }
 
-    listen() {
-        this.canvas.onmouseup = this.mouseUpHandler.bind(this);
-        this.canvas.onmousedown = this.mouseDownHandler.bind(this);
-        this.canvas.onmousemove = this.mouseMoveHandler.bind(this);
+    static listen() {
+        Line.canvas.onmouseup = Line.mouseUpHandler.bind(this);
+        Line.canvas.onmouseleave = Line.mouseUpHandler.bind(this);
+        Line.canvas.onmousedown = Line.mouseDownHandler.bind(this);
+        Line.canvas.onmousemove = Line.mouseMoveHandler.bind(this);
     }
 
-    mouseUpHandler() {
-        super.mouseUpHandler();
-        this.socket.emit('draw', {
-            method: 'draw',
-            id: this.sessionId,
-            figure: {
-                type: 'line',
-                x: this.currentX,
-                y: this.currentY,
-                color: this.ctx!.strokeStyle,
-                lineWidth: this.ctx!.lineWidth
-            }
-        });
+    static mouseUpHandler() {
+        if (Line.mouseDown) {
+            super.mouseUpHandler();
+            Line.socket.emit('draw', {
+                method: 'draw',
+                id: Line.sessionId,
+                figure: {
+                    type: 'line',
+                    x: Line.endX,
+                    y: Line.endY,
+                    startX: Line.startX,
+                    startY: Line.startY,
+                    strokeColor: Line.ctx!.strokeStyle,
+                    lineWidth: Line.ctx!.lineWidth
+                }
+            });
+        }
     }
-    mouseDownHandler(event: MouseEvent) {
-        this.mouseDown = true;
-        this.currentX = event.pageX - (event.target as HTMLElement).offsetLeft;
-        this.currentY = event.pageY - (event.target as HTMLElement).offsetTop;
-        this.ctx!.beginPath();
-        this.ctx!.moveTo(this.currentX, this.currentY);
-        this.saved = this.canvas.toDataURL();
+    static mouseDownHandler(event: MouseEvent) {
+        Line.mouseDown = true;
+        Line.startX = event.pageX - (event.target as HTMLElement).offsetLeft;
+        Line.startY = event.pageY - (event.target as HTMLElement).offsetTop;
+        Line.ctx!.beginPath();
+        Line.ctx!.moveTo(Line.endX, Line.endY);
+        Line.saved = Line.canvas.toDataURL();
     }
-    mouseMoveHandler(event: MouseEvent) {
-        if (this.mouseDown) {
-            this.draw(
-                event.pageX - (event.target as HTMLElement).offsetLeft,
-                event.pageY - (event.target as HTMLElement).offsetTop
-            );
+
+    static mouseMoveHandler(event: MouseEvent) {
+        if (Line.mouseDown) {
+            Line.endX = event.pageX - (event.target as HTMLElement).offsetLeft;
+            Line.endY = event.pageY - (event.target as HTMLElement).offsetTop;
+            Line.draw(Line.endX, Line.endY);
         }
     }
 
-    draw(x: number, y: number) {
+    static draw(x: number, y: number) {
         const img = new Image();
-        img.src = this.saved;
+        img.src = Line.saved;
         img.onload = () => {
-            this.ctx!.clearRect(0, 0, this.canvas.width, this.canvas.height);
-            this.ctx!.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
-            this.ctx!.beginPath();
-            this.ctx!.moveTo(this.currentX, this.currentY);
-            this.ctx!.lineTo(x, y);
-            this.ctx!.stroke();
+            Line.ctx!.clearRect(0, 0, Line.canvas.width, Line.canvas.height);
+            Line.ctx!.drawImage(img, 0, 0, Line.canvas.width, Line.canvas.height);
+            Line.ctx!.beginPath();
+            Line.ctx!.moveTo(Line.startX, Line.startY);
+            Line.ctx!.lineTo(x, y);
+            Line.ctx!.stroke();
         };
     }
 
-    static staticDraw(ctx: CanvasRenderingContext2D, x: number, y: number, color: string, lineWidth: number) {
-        ctx!.lineWidth = lineWidth;
-        ctx!.strokeStyle = color;
-        ctx!.lineTo(x, y);
-        ctx!.stroke();
+    static staticDraw(startX: number, startY: number, x: number, y: number, colorStroke: string, lineWidth: number) {
+        Line.ctx!.lineWidth = lineWidth;
+        Line.ctx!.strokeStyle = colorStroke;
+
+        Line.ctx!.beginPath();
+        Line.ctx!.moveTo(startX, startY);
+        Line.ctx!.lineTo(x, y);
+        Line.ctx!.stroke();
     }
 }

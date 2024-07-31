@@ -2,69 +2,69 @@ import { Socket } from 'socket.io-client';
 import Tool from './Tool';
 
 export default class Rect extends Tool {
-    declare width: number;
-    declare height: number;
+    declare static width: number;
+    declare static height: number;
 
     constructor(canvas: HTMLCanvasElement, socket: Socket, sessionId: string) {
         super(canvas, socket, sessionId);
-        this.listen();
+        Rect.listen();
     }
 
-    listen() {
-        this.canvas.onmouseup = this.mouseUpHandler.bind(this);
-        this.canvas.onmousedown = this.mouseDownHandler.bind(this);
-        this.canvas.onmousemove = this.mouseMoveHandler.bind(this);
+    static listen() {
+        Rect.canvas.onmouseup = Rect.mouseUpHandler.bind(this);
+        Rect.canvas.onmouseleave = Rect.mouseUpHandler.bind(this);
+        Rect.canvas.onmousedown = Rect.mouseDownHandler.bind(this);
+        Rect.canvas.onmousemove = Rect.mouseMoveHandler.bind(this);
     }
 
-    mouseUpHandler() {
+    static mouseUpHandler() {
         super.mouseUpHandler();
-        this.socket.emit('draw', {
+        Rect.socket.emit('draw', {
             method: 'draw',
-            id: this.sessionId,
+            id: Rect.sessionId,
             figure: {
                 type: 'rect',
-                x: this.startX,
-                y: this.startY,
-                width: this.width,
-                height: this.height,
-                colorFill: this.ctx!.fillStyle,
-                colorStroke: this.ctx!.strokeStyle,
-                lineWidth: this.ctx!.lineWidth
+                x: Rect.startX,
+                y: Rect.startY,
+                width: Rect.width,
+                height: Rect.height,
+                fillColor: Rect.ctx!.fillStyle,
+                strokeColor: Rect.ctx!.strokeStyle,
+                lineWidth: Rect.ctx!.lineWidth
             }
         });
     }
-    mouseDownHandler(event: MouseEvent) {
-        this.mouseDown = true;
-        this.ctx!.beginPath();
-        this.startX = event.pageX - (event.target as HTMLElement).offsetLeft;
-        this.startY = event.pageY - (event.target as HTMLElement).offsetTop;
-        this.saved = this.canvas.toDataURL();
+    static mouseDownHandler(event: MouseEvent) {
+        Rect.mouseDown = true;
+        Rect.ctx!.beginPath();
+        Rect.startX = event.pageX - (event.target as HTMLElement).offsetLeft;
+        Rect.startY = event.pageY - (event.target as HTMLElement).offsetTop;
+        Rect.saved = Rect.canvas.toDataURL();
     }
-    mouseMoveHandler(event: MouseEvent) {
-        if (this.mouseDown) {
+    static mouseMoveHandler(event: MouseEvent) {
+        if (Rect.mouseDown) {
             const currentX = event.pageX - (event.target as HTMLElement).offsetLeft;
             const currentY = event.pageY - (event.target as HTMLElement).offsetTop;
-            this.width = currentX - this.startX;
-            this.height = currentY - this.startY;
-            this.draw(this.startX, this.startY, this.width, this.height);
+            Rect.width = currentX - Rect.startX;
+            Rect.height = currentY - Rect.startY;
+            Rect.draw(Rect.startX, Rect.startY, Rect.width, Rect.height);
         }
     }
 
-    draw(x: number, y: number, w: number, h: number) {
+    static draw(x: number, y: number, w: number, h: number) {
         const img = new Image();
-        img.src = this.saved;
+        img.src = Rect.saved;
         img.onload = () => {
-            this.ctx!.clearRect(0, 0, this.canvas.width, this.canvas.height);
-            this.ctx!.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
-            this.ctx!.beginPath();
-            this.ctx!.rect(x, y, w, h);
-            this.ctx!.fill();
-            this.ctx!.stroke();
+            Rect.ctx!.clearRect(0, 0, Rect.canvas.width, Rect.canvas.height);
+            Rect.ctx!.drawImage(img, 0, 0, Rect.canvas.width, Rect.canvas.height);
+            Rect.ctx!.beginPath();
+            Rect.ctx!.rect(x, y, w, h);
+            Rect.ctx!.fill();
+            Rect.ctx!.stroke();
         };
     }
 
     static staticDraw(
-        ctx: CanvasRenderingContext2D,
         x: number,
         y: number,
         w: number,
@@ -73,12 +73,12 @@ export default class Rect extends Tool {
         colorStroke: string,
         lineWidth: number
     ) {
-        ctx!.lineWidth = lineWidth;
-        ctx!.fillStyle = colorFill;
-        ctx!.strokeStyle = colorStroke;
-        ctx!.beginPath();
-        ctx!.rect(x, y, w, h);
-        ctx!.fill();
-        ctx!.stroke();
+        Rect.ctx!.lineWidth = lineWidth;
+        Rect.ctx!.fillStyle = colorFill;
+        Rect.ctx!.strokeStyle = colorStroke;
+        Rect.ctx!.beginPath();
+        Rect.ctx!.rect(x, y, w, h);
+        Rect.ctx!.fill();
+        Rect.ctx!.stroke();
     }
 }

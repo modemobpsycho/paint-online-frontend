@@ -1,47 +1,46 @@
 import { Socket } from 'socket.io-client';
-import ITool from '../types/tool.inteface';
 
-export default class Tool implements ITool {
-    canvas: HTMLCanvasElement;
-    ctx: CanvasRenderingContext2D | null;
-    declare mouseDown: boolean;
-    declare startX: number;
-    declare startY: number;
-    declare saved: string;
-    declare lineWidth: number;
-    declare fillColor: string;
-    declare strokeColor: string;
-    declare socket: Socket;
-    declare sessionId: string;
+export default class Tool {
+    static canvas: HTMLCanvasElement;
+    static ctx: CanvasRenderingContext2D | null;
+    declare static mouseDown: boolean;
+    declare static startX: number;
+    declare static startY: number;
+    declare static saved: string;
+    declare static lineWidth: number;
+    declare static fillColor: string;
+    declare static strokeColor: string;
+    declare static socket: Socket;
+    declare static sessionId: string;
 
     constructor(canvas: HTMLCanvasElement, socket: Socket, sessionId: string) {
-        this.canvas = canvas;
-        this.socket = socket;
-        this.sessionId = sessionId;
-        this.ctx = canvas.getContext('2d');
-        this.ctx!.lineCap = 'round';
-        this.destroyEvents();
+        Tool.canvas = canvas;
+        Tool.socket = socket;
+        Tool.sessionId = sessionId;
+        Tool.ctx = canvas.getContext('2d');
+        Tool.ctx!.lineCap = 'round';
+        Tool.destroyEvents();
     }
 
-    setFillColor(color: string) {
+    static setFillColor(color: string) {
         this.ctx!.fillStyle = color;
     }
 
-    setStrokeColor(color: string) {
+    static setStrokeColor(color: string) {
         this.ctx!.strokeStyle = color;
     }
 
-    setLineWidth(width: number) {
+    static setLineWidth(width: number) {
         this.ctx!.lineWidth = width;
     }
 
-    destroyEvents() {
+    static destroyEvents() {
         this.canvas.onmouseup = null;
         this.canvas.onmousedown = null;
         this.canvas.onmousemove = null;
     }
 
-    mouseUpHandler() {
+    static mouseUpHandler() {
         this.mouseDown = false;
     }
 }

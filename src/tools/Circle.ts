@@ -2,84 +2,77 @@ import { Socket } from 'socket.io-client';
 import Tool from './Tool';
 
 export default class Circle extends Tool {
-    declare width: number;
-    declare height: number;
-    declare r: number;
+    declare static width: number;
+    declare static height: number;
+    declare static r: number;
 
     constructor(canvas: HTMLCanvasElement, socket: Socket, sessionId: string) {
         super(canvas, socket, sessionId);
-        this.listen();
+        Circle.listen();
     }
 
-    listen() {
-        this.canvas.onmouseup = this.mouseUpHandler.bind(this);
-        this.canvas.onmousedown = this.mouseDownHandler.bind(this);
-        this.canvas.onmousemove = this.mouseMoveHandler.bind(this);
+    static listen() {
+        Circle.canvas.onmouseup = Circle.mouseUpHandler.bind(this);
+        Circle.canvas.onmouseleave = Circle.mouseUpHandler.bind(this);
+        Circle.canvas.onmousedown = Circle.mouseDownHandler.bind(this);
+        Circle.canvas.onmousemove = Circle.mouseMoveHandler.bind(this);
     }
 
-    mouseUpHandler() {
+    static mouseUpHandler() {
         super.mouseUpHandler();
-        this.socket.emit('draw', {
+        Circle.socket.emit('draw', {
             method: 'draw',
-            id: this.sessionId,
+            id: Circle.sessionId,
             figure: {
                 type: 'circle',
-                x: this.startX,
-                y: this.startY,
-                radius: Math.sqrt(Math.pow(this.width, 2) + Math.pow(this.height, 2)),
-                colorFill: this.ctx!.fillStyle,
-                colorStroke: this.ctx!.strokeStyle,
-                lineWidth: this.ctx!.lineWidth
+                x: Circle.startX,
+                y: Circle.startY,
+                radius: Math.sqrt(Math.pow(Circle.width, 2) + Math.pow(Circle.height, 2)),
+                fillColor: Circle.ctx!.fillStyle,
+                strokeColor: Circle.ctx!.strokeStyle,
+                lineWidth: Circle.ctx!.lineWidth
             }
         });
     }
-    mouseDownHandler(event: MouseEvent) {
-        this.mouseDown = true;
-        const canvasData = this.canvas.toDataURL();
-        this.ctx!.beginPath();
-        this.startX = event.pageX - (event.target as HTMLElement).offsetLeft;
-        this.startY = event.pageY - (event.target as HTMLElement).offsetTop;
-        this.saved = canvasData;
+    static mouseDownHandler(event: MouseEvent) {
+        Circle.mouseDown = true;
+        const canvasData = Circle.canvas.toDataURL();
+        Circle.ctx!.beginPath();
+        Circle.startX = event.pageX - (event.target as HTMLElement).offsetLeft;
+        Circle.startY = event.pageY - (event.target as HTMLElement).offsetTop;
+        Circle.saved = canvasData;
     }
-    mouseMoveHandler(event: MouseEvent) {
-        if (this.mouseDown) {
+    static mouseMoveHandler(event: MouseEvent) {
+        if (Circle.mouseDown) {
             const currentX = event.pageX - (event.target as HTMLElement).offsetLeft;
             const currentY = event.pageY - (event.target as HTMLElement).offsetTop;
-            this.width = currentX - this.startX;
-            this.height = currentY - this.startY;
-            this.r = Math.sqrt(Math.pow(this.width, 2) + Math.pow(this.height, 2));
-            this.draw(this.startX, this.startY, this.r);
+            Circle.width = currentX - Circle.startX;
+            Circle.height = currentY - Circle.startY;
+            Circle.r = Math.sqrt(Math.pow(Circle.width, 2) + Math.pow(Circle.height, 2));
+            Circle.draw(Circle.startX, Circle.startY, Circle.r);
         }
     }
 
-    draw(x: number, y: number, r: number) {
+    static draw(x: number, y: number, r: number) {
         const img = new Image();
-        img.src = this.saved;
+        img.src = Circle.saved;
         img.onload = () => {
-            this.ctx!.clearRect(0, 0, this.canvas.width, this.canvas.height);
-            this.ctx!.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
-            this.ctx!.beginPath();
-            this.ctx!.arc(x, y, r, 0, 2 * Math.PI);
-            this.ctx!.fill();
-            this.ctx!.stroke();
+            Circle.ctx!.clearRect(0, 0, Circle.canvas.width, Circle.canvas.height);
+            Circle.ctx!.drawImage(img, 0, 0, Circle.canvas.width, Circle.canvas.height);
+            Circle.ctx!.beginPath();
+            Circle.ctx!.arc(x, y, r, 0, 2 * Math.PI);
+            Circle.ctx!.fill();
+            Circle.ctx!.stroke();
         };
     }
 
-    static staticDraw(
-        ctx: CanvasRenderingContext2D,
-        x: number,
-        y: number,
-        r: number,
-        colorStroke: string,
-        colorFill: string,
-        lineWidth: number
-    ) {
-        ctx!.lineWidth = lineWidth;
-        ctx!.strokeStyle = colorStroke;
-        ctx!.fillStyle = colorFill;
-        ctx!.beginPath();
-        ctx!.arc(x, y, r, 0, 2 * Math.PI);
-        ctx!.fill();
-        ctx!.stroke();
+    static staticDraw(x: number, y: number, r: number, colorStroke: string, colorFill: string, lineWidth: number) {
+        Circle.ctx!.lineWidth = lineWidth;
+        Circle.ctx!.strokeStyle = colorStroke;
+        Circle.ctx!.fillStyle = colorFill;
+        Circle.ctx!.beginPath();
+        Circle.ctx!.arc(x, y, r, 0, 2 * Math.PI);
+        Circle.ctx!.fill();
+        Circle.ctx!.stroke();
     }
 }

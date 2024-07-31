@@ -4,64 +4,57 @@ import Tool from './Tool';
 export default class Brush extends Tool {
     constructor(canvas: HTMLCanvasElement, socket: Socket, sessionId: string) {
         super(canvas, socket, sessionId);
-        this.listen();
+        Brush.listen();
     }
 
-    listen() {
-        this.canvas.onmouseup = this.mouseUpHandler.bind(this);
-        this.canvas.onmousedown = this.mouseDownHandler.bind(this);
-        this.canvas.onmousemove = this.mouseMoveHandler.bind(this);
+    static listen() {
+        Brush.canvas.onmouseup = this.mouseUpHandler.bind(this);
+        Brush.canvas.onmouseleave = this.mouseUpHandler.bind(this);
+        Brush.canvas.onmousedown = this.mouseDownHandler.bind(this);
+        Brush.canvas.onmousemove = this.mouseMoveHandler.bind(this);
     }
 
-    mouseUpHandler() {
+    static mouseUpHandler() {
         super.mouseUpHandler();
-        this.socket.emit('draw', {
+        Brush.socket.emit('draw', {
             method: 'draw',
-            id: this.sessionId,
+            id: Brush.sessionId,
             figure: {
                 type: 'finish'
             }
         });
     }
 
-    mouseDownHandler(event: MouseEvent) {
-        this.mouseDown = true;
-        this.ctx!.beginPath();
-        this.ctx!.moveTo(
+    static mouseDownHandler(event: MouseEvent) {
+        Brush.mouseDown = true;
+        Brush.ctx!.beginPath();
+        Brush.ctx!.moveTo(
             event.pageX - (event.target as HTMLElement).offsetLeft,
             event.pageY - (event.target as HTMLElement).offsetTop
         );
     }
-    
-    mouseMoveHandler(event: MouseEvent) {
-        if (this.mouseDown) {
-            this.socket.emit('draw', {
+
+    static mouseMoveHandler(event: MouseEvent) {
+        if (Brush.mouseDown) {
+            Brush.socket.emit('draw', {
                 method: 'draw',
-                id: this.sessionId,
+                id: Brush.sessionId,
                 figure: {
                     type: 'brush',
-                    x: event.pageX - (event.target as HTMLElement).offsetLeft,
-                    y: event.pageY - (event.target as HTMLElement).offsetTop,
-                    color: this.ctx!.strokeStyle,
-                    lineWidth: this.ctx!.lineWidth,
-                    lineCap: this.ctx!.lineCap
+                    posX: event.pageX - (event.target as HTMLElement).offsetLeft,
+                    posY: event.pageY - (event.target as HTMLElement).offsetTop,
+                    strokeColor: Brush.ctx!.strokeStyle,
+                    lineWidth: Brush.ctx!.lineWidth,
+                    lineCap: Brush.ctx!.lineCap
                 }
             });
         }
     }
 
-    static staticDraw(
-        ctx: CanvasRenderingContext2D,
-        x: number,
-        y: number,
-        color: string,
-        lineWidth: number,
-        lineCap: CanvasLineCap
-    ) {
-        ctx!.lineCap = lineCap;
-        ctx!.lineWidth = lineWidth;
-        ctx!.strokeStyle = color;
-        ctx!.lineTo(x, y);
-        ctx!.stroke();
+    static staticDraw(x: number, y: number, color: string, lineWidth: number) {
+        Brush.ctx!.lineWidth = lineWidth;
+        Brush.ctx!.strokeStyle = color;
+        Brush.ctx!.lineTo(x, y);
+        Brush.ctx!.stroke();
     }
 }
