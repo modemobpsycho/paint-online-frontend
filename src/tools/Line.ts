@@ -1,11 +1,11 @@
 import { Socket } from 'socket.io-client';
 import Tool from './Tool';
+import useCanvasStore from '../stores/canvasStore';
 
 export default class Line extends Tool {
-    static startX: number;
-    static startY: number;
-    static endX: number;
-    static endY: number;
+    static arrX: number[] = [];
+    static arrY: number[] = [];
+
     constructor(canvas: HTMLCanvasElement, socket: Socket, sessionId: string) {
         super(canvas, socket, sessionId);
         Line.listen();
@@ -19,37 +19,51 @@ export default class Line extends Tool {
     }
 
     static mouseUpHandler() {
-        if (Line.mouseDown) {
-            super.mouseUpHandler();
-            Line.socket.emit('draw', {
-                method: 'draw',
-                id: Line.sessionId,
-                figure: {
-                    type: 'line',
-                    x: Line.endX,
-                    y: Line.endY,
-                    startX: Line.startX,
-                    startY: Line.startY,
-                    strokeColor: Line.ctx!.strokeStyle,
-                    lineWidth: Line.ctx!.lineWidth
-                }
-            });
+        if (!Line.mouseDown) {
+            return;
         }
+        super.mouseUpHandler();
+        const figure = {
+            type: 'line',
+            posX: Line.arrX as number[],
+            posY: Line.arrY as number[],
+            strokeColor: Line.ctx!.strokeStyle as string,
+            lineWidth: Line.ctx!.lineWidth as number
+        };
+
+        Line.socket.emit('draw', {
+            method: 'draw',
+            id: Line.sessionId,
+            figure
+        });
+        const { addDrawing } = useCanvasStore.getState();
+        addDrawing({ ...figure, type: 'brush' });
+
+        Line.arrX = [];
+        Line.arrY = [];
+        Line.socket.emit('draw', {
+            method: 'draw',
+            id: Line.sessionId,
+            figure: {
+                type: 'finish'
+            }
+        });
     }
+
     static mouseDownHandler(event: MouseEvent) {
         Line.mouseDown = true;
-        Line.startX = event.pageX - (event.target as HTMLElement).offsetLeft;
-        Line.startY = event.pageY - (event.target as HTMLElement).offsetTop;
+        Line.arrX[0] = event.pageX - (event.target as HTMLElement).offsetLeft;
+        Line.arrY[0] = event.pageY - (event.target as HTMLElement).offsetTop;
         Line.ctx!.beginPath();
-        Line.ctx!.moveTo(Line.endX, Line.endY);
+        Line.ctx!.moveTo(Line.arrX[1], Line.arrY[1]);
         Line.saved = Line.canvas.toDataURL();
     }
 
     static mouseMoveHandler(event: MouseEvent) {
         if (Line.mouseDown) {
-            Line.endX = event.pageX - (event.target as HTMLElement).offsetLeft;
-            Line.endY = event.pageY - (event.target as HTMLElement).offsetTop;
-            Line.draw(Line.endX, Line.endY);
+            Line.arrX[1] = event.pageX - (event.target as HTMLElement).offsetLeft;
+            Line.arrY[1] = event.pageY - (event.target as HTMLElement).offsetTop;
+            Line.draw(Line.arrX[1], Line.arrY[1]);
         }
     }
 
@@ -60,7 +74,7 @@ export default class Line extends Tool {
             Line.ctx!.clearRect(0, 0, Line.canvas.width, Line.canvas.height);
             Line.ctx!.drawImage(img, 0, 0, Line.canvas.width, Line.canvas.height);
             Line.ctx!.beginPath();
-            Line.ctx!.moveTo(Line.startX, Line.startY);
+            Line.ctx!.moveTo(Line.arrX[0], Line.arrY[0]);
             Line.ctx!.lineTo(x, y);
             Line.ctx!.stroke();
         };

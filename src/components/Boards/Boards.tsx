@@ -1,8 +1,8 @@
 import { Box, Button, Typography, Card, CardContent } from '@mui/material';
-import useCanvasStore from '../../stores/canvasStore';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useCanvasStore from '../../stores/canvasStore';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 function Boards() {
     const { user, boards, deleteBoard, setBoards } = useCanvasStore((state) => state);

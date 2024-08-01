@@ -3,7 +3,15 @@ import { create } from 'zustand';
 import IBoard from '../types/board.interface';
 import axios from 'axios';
 import { API_URL } from '../helpers/constants';
-import { IFigure } from '../types/figure.interface';
+import IFigure from '../types/figure.interface';
+import Brush from '../tools/Brush';
+import Rect from '../tools/Rect';
+import Circle from '../tools/Circle';
+import canvasMath from '../helpers/canvasMath';
+import Line from '../tools/Line';
+import Eraser from '../tools/Eraser';
+import Tool from '../tools/Tool';
+import useToolStore from './toolStore';
 
 interface CanvasState {
     canvas: HTMLCanvasElement | null;
@@ -19,10 +27,9 @@ interface CanvasState {
     sessionId: string;
     boards: IBoard[];
     drawings: IFigure[];
-    setDrawings: () => void;
+    getDrawings: (boardId: number) => void;
+    setDrawings: (drawings: IFigure[]) => void;
     addDrawing: (drawing: IFigure) => void;
-    deleteDrawing: (id: number) => void;
-    getDrawing: (id: number) => void;
     deleteAllDrawings: () => void;
     undo: () => void;
     redo: () => void;
@@ -102,12 +109,69 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
         set({ currentBoardUsers: [] });
     },
     drawings: [],
-    setDrawings: async () => {
+    setDrawings: (drawings) => {
+        set({ drawings: drawings });
+    },
+    getDrawings: async (boardId) => {
         try {
             if (get().user) {
-                const response = await axios.get(API_URL + '/drawing/' + get().user);
+                const response = await axios.get(API_URL + '/board/' + boardId + '/drawings/');
                 const data = await response.data;
                 set({ drawings: data });
+                const { setOptions } = useToolStore.getState();
+                response.data.forEach((figure: IFigure) => {
+                    switch (figure.type) {
+                        case 'brush':
+                            Brush.staticDraw(figure.posX, figure.posY, figure.strokeColor, figure.lineWidth);
+                            setOptions();
+                            break;
+                        case 'rect':
+                            Rect.staticDraw(
+                                figure.posX[0],
+                                figure.posY[0],
+                                figure.posX.slice(-1)[0] - figure.posX[0],
+                                figure.posY.slice(-1)[0] - figure.posY[0],
+                                figure.fillColor || figure.strokeColor,
+                                figure.strokeColor,
+                                figure.lineWidth
+                            );
+                            setOptions();
+                            break;
+                        case 'circle':
+                            Circle.staticDraw(
+                                figure.posX[0],
+                                figure.posY[0],
+                                canvasMath.getRadius(figure.posX[0], figure.posY[0], figure.posX[1], figure.posY[1]),
+                                figure.strokeColor,
+                                figure.fillColor || figure.strokeColor,
+                                figure.lineWidth
+                            );
+                            setOptions();
+                            break;
+                        case 'line':
+                            Line.staticDraw(
+                                figure.posX[0],
+                                figure.posY[0],
+                                figure.posX[1],
+                                figure.posY[1],
+                                figure.strokeColor,
+                                figure.lineWidth
+                            );
+                            setOptions();
+                            break;
+                        case 'eraser':
+                            Eraser.staticDrawEraser(
+                                figure.posX.slice(-1)[0],
+                                figure.posY.slice(-1)[0],
+                                figure.lineWidth
+                            );
+                            break;
+                        case 'finish':
+                            Tool.ctx!.beginPath();
+                            setOptions();
+                            break;
+                    }
+                });
             }
         } catch (error) {
             console.log(error);
@@ -125,19 +189,13 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
                 username: get().user
             });
             get()
-                .boards.find((board) => board.id === get().board?.id)
+                .boards.find((board) => board.id === get().sessionId)
                 ?.drawings.push(response.data);
         } catch (error) {
             console.log(error);
         }
 
         set({ drawings: [...get().drawings, drawing] });
-    },
-    deleteDrawing: (id) => {
-        set((state) => ({ drawings: state.drawings.filter((drawing) => drawing.id !== id) }));
-    },
-    getDrawing: (id) => {
-        set((state) => ({ drawings: state.drawings.filter((drawing) => drawing.id === id) }));
     },
     deleteAllDrawings: () => {
         try {

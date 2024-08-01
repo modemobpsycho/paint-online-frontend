@@ -3,6 +3,7 @@ import Input from '@mui/material/Input';
 import InputLabel from '@mui/material/InputLabel';
 import { ChangeEventHandler, MouseEventHandler } from 'react';
 import { Button as BootstrapButton, Modal as BootstrapModal, ModalProps } from 'react-bootstrap';
+
 export default function Modal({
     props,
     isCloseButton,

@@ -2,7 +2,6 @@ import '../../styles/header.scss';
 import BrushIcon from '@mui/icons-material/Brush';
 import BoxIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CircleIcon from '@mui/icons-material/RadioButtonUnchecked';
-import EditIcon from '@mui/icons-material/Edit';
 import LineIcon from '@mui/icons-material/ShowChart';
 import UndoIcon from '@mui/icons-material/UndoOutlined';
 import HomeIcon from '@mui/icons-material/Home';
@@ -64,7 +63,16 @@ export default function Toolbar() {
                 className="toolbar__button"
                 onClick={() => setTool(new Eraser(canvas!, socket!, sessionId) as ITool)}
             >
-                <EditIcon />
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    fill="currentColor"
+                    className="bi bi-eraser-fill fs-3"
+                    viewBox="0 0 16 16"
+                >
+                    <path d="M8.086 2.207a2 2 0 0 1 2.828 0l3.879 3.879a2 2 0 0 1 0 2.828l-5.5 5.5A2 2 0 0 1 7.879 15H5.12a2 2 0 0 1-1.414-.586l-2.5-2.5a2 2 0 0 1 0-2.828l6.879-6.879zm.66 11.34L3.453 8.254 1.914 9.793a1 1 0 0 0 0 1.414l2.5 2.5a1 1 0 0 0 .707.293H7.88a1 1 0 0 0 .707-.293l.16-.16z" />
+                </svg>
             </button>
             <button className="toolbar__button" onClick={() => setTool(new Line(canvas!, socket!, sessionId) as ITool)}>
                 <LineIcon />

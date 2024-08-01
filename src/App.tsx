@@ -36,6 +36,8 @@ function App() {
         });
 
         socket.on('draw', (message) => {
+            console.log(message.user === user);
+            if (message.user === user) return;
             drawHandler(message);
         });
     }, []);

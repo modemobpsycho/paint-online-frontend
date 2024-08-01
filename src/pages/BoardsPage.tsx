@@ -1,6 +1,5 @@
 import { Box, Button, Typography, Toolbar } from '@mui/material';
 import useCanvasStore from '../stores/canvasStore';
-
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import Modal from '../shared/Modal/Modal';

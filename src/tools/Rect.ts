@@ -1,9 +1,10 @@
 import { Socket } from 'socket.io-client';
 import Tool from './Tool';
+import useCanvasStore from '../stores/canvasStore';
 
 export default class Rect extends Tool {
-    declare static width: number;
-    declare static height: number;
+    static arrX: number[] = [];
+    static arrY: number[] = [];
 
     constructor(canvas: HTMLCanvasElement, socket: Socket, sessionId: string) {
         super(canvas, socket, sessionId);
@@ -18,36 +19,52 @@ export default class Rect extends Tool {
     }
 
     static mouseUpHandler() {
+        if (!Rect.mouseDown) {
+            return;
+        }
         super.mouseUpHandler();
+        const figure = {
+            type: 'rect',
+            posX: Rect.arrX as number[],
+            posY: Rect.arrY as number[],
+            width: (Rect.arrX.at(-1) as number) - Rect.arrX[0],
+            height: (Rect.arrY.at(-1) as number) - Rect.arrY[0],
+            fillColor: Rect.ctx!.fillStyle as string,
+            strokeColor: Rect.ctx!.strokeStyle as string,
+            lineWidth: Rect.ctx!.lineWidth as number
+        };
+
+        const { addDrawing } = useCanvasStore.getState();
+        addDrawing({ ...figure, type: 'rect' });
+
         Rect.socket.emit('draw', {
             method: 'draw',
             id: Rect.sessionId,
-            figure: {
-                type: 'rect',
-                x: Rect.startX,
-                y: Rect.startY,
-                width: Rect.width,
-                height: Rect.height,
-                fillColor: Rect.ctx!.fillStyle,
-                strokeColor: Rect.ctx!.strokeStyle,
-                lineWidth: Rect.ctx!.lineWidth
-            }
+            figure
         });
+        Rect.arrX = [];
+        Rect.arrY = [];
     }
+
     static mouseDownHandler(event: MouseEvent) {
         Rect.mouseDown = true;
         Rect.ctx!.beginPath();
-        Rect.startX = event.pageX - (event.target as HTMLElement).offsetLeft;
-        Rect.startY = event.pageY - (event.target as HTMLElement).offsetTop;
+        Rect.arrX[0] = event.pageX - (event.target as HTMLElement).offsetLeft;
+        Rect.arrY[0] = event.pageY - (event.target as HTMLElement).offsetTop;
         Rect.saved = Rect.canvas.toDataURL();
     }
+
     static mouseMoveHandler(event: MouseEvent) {
         if (Rect.mouseDown) {
-            const currentX = event.pageX - (event.target as HTMLElement).offsetLeft;
-            const currentY = event.pageY - (event.target as HTMLElement).offsetTop;
-            Rect.width = currentX - Rect.startX;
-            Rect.height = currentY - Rect.startY;
-            Rect.draw(Rect.startX, Rect.startY, Rect.width, Rect.height);
+            Rect.arrX.push(event.pageX - (event.target as HTMLElement).offsetLeft);
+            Rect.arrY.push(event.pageY - (event.target as HTMLElement).offsetTop);
+
+            Rect.draw(
+                Rect.arrX[0],
+                Rect.arrY[0],
+                (Rect.arrX.at(-1) as number) - Rect.arrX[0],
+                (Rect.arrY.at(-1) as number) - Rect.arrY[0]
+            );
         }
     }
 

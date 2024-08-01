@@ -1,4 +1,4 @@
-export interface IDrawing {
+export default interface IDrawing {
     id: number;
     type: string;
     lineWidth: number;

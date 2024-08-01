@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io-client';
 
-interface ITool {
+export default interface ITool {
     mouseDown: boolean;
     startX: number;
     startY: number;
@@ -13,5 +13,3 @@ interface ITool {
     sessionId: string;
     mouseUpHandler: () => void;
 }
-
-export default ITool;

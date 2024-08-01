@@ -1,10 +1,10 @@
 import { Socket } from 'socket.io-client';
 import Tool from './Tool';
+import useCanvasStore from '../stores/canvasStore';
 
 export default class Circle extends Tool {
-    declare static width: number;
-    declare static height: number;
-    declare static r: number;
+    static arrX: number[] = [];
+    static arrY: number[] = [];
 
     constructor(canvas: HTMLCanvasElement, socket: Socket, sessionId: string) {
         super(canvas, socket, sessionId);
@@ -19,37 +19,54 @@ export default class Circle extends Tool {
     }
 
     static mouseUpHandler() {
+        if (!Circle.mouseDown) {
+            return;
+        }
         super.mouseUpHandler();
+        const figure = {
+            type: 'circle',
+            posX: [Circle.arrX[0], Circle.arrX.at(-1) as number],
+            posY: [Circle.arrY[0], Circle.arrY.at(-1) as number],
+            fillColor: Circle.ctx!.fillStyle as string,
+            strokeColor: Circle.ctx!.strokeStyle as string,
+            lineWidth: Circle.ctx!.lineWidth
+        };
+
+        const { addDrawing, user } = useCanvasStore.getState();
+        addDrawing({ ...figure, type: 'circle' });
+
         Circle.socket.emit('draw', {
             method: 'draw',
             id: Circle.sessionId,
-            figure: {
-                type: 'circle',
-                x: Circle.startX,
-                y: Circle.startY,
-                radius: Math.sqrt(Math.pow(Circle.width, 2) + Math.pow(Circle.height, 2)),
-                fillColor: Circle.ctx!.fillStyle,
-                strokeColor: Circle.ctx!.strokeStyle,
-                lineWidth: Circle.ctx!.lineWidth
-            }
+            figure,
+            username: user
         });
+
+        Circle.arrX = [];
+        Circle.arrY = [];
     }
+
     static mouseDownHandler(event: MouseEvent) {
         Circle.mouseDown = true;
         const canvasData = Circle.canvas.toDataURL();
         Circle.ctx!.beginPath();
-        Circle.startX = event.pageX - (event.target as HTMLElement).offsetLeft;
-        Circle.startY = event.pageY - (event.target as HTMLElement).offsetTop;
+        Circle.arrX[0] = event.pageX - (event.target as HTMLElement).offsetLeft;
+        Circle.arrY[0] = event.pageY - (event.target as HTMLElement).offsetTop;
         Circle.saved = canvasData;
     }
+
     static mouseMoveHandler(event: MouseEvent) {
         if (Circle.mouseDown) {
-            const currentX = event.pageX - (event.target as HTMLElement).offsetLeft;
-            const currentY = event.pageY - (event.target as HTMLElement).offsetTop;
-            Circle.width = currentX - Circle.startX;
-            Circle.height = currentY - Circle.startY;
-            Circle.r = Math.sqrt(Math.pow(Circle.width, 2) + Math.pow(Circle.height, 2));
-            Circle.draw(Circle.startX, Circle.startY, Circle.r);
+            Circle.arrX.push(event.pageX - (event.target as HTMLElement).offsetLeft);
+            Circle.arrY.push(event.pageY - (event.target as HTMLElement).offsetTop);
+            Circle.draw(
+                Circle.arrX[0],
+                Circle.arrY[0],
+
+                (((Circle.arrX.at(-1) as number) - Circle.arrX[0]) ** 2 +
+                    ((Circle.arrY.at(-1) as number) - Circle.arrY[0]) ** 2) **
+                    0.5
+            );
         }
     }
 

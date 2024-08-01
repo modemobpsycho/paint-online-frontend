@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
-import useCanvasStore from '../../stores/canvasStore';
-import { useToolStore } from '../../stores/toolStore';
 import './canvas.scss';
-import Brush from '../../tools/Brush';
+import { useEffect, useRef, useState } from 'react';
+import { useToolStore } from '../../stores/toolStore';
+import useCanvasStore from '../../stores/canvasStore';
 import { useParams } from 'react-router-dom';
 import ITool from '../../types/tool.interface';
+import Brush from '../../tools/Brush';
 
 export default function Canvas() {
     const { setCanvas, pushToUndo, user, socket, setSessionId, getBoard, deleteCurrentBoardUsers } = useCanvasStore(
@@ -36,6 +36,7 @@ export default function Canvas() {
         window.addEventListener('resize', () => {
             setCanvasSize({ width: window.innerWidth, height: window.innerHeight - 80 });
         });
+
         return () => {
             window.removeEventListener('resize', () => {
                 setCanvasSize({ width: window.innerWidth, height: window.innerHeight - 80 });

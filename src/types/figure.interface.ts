@@ -1,13 +1,8 @@
-export interface IFigure {
-    id: number;
+export default interface IFigure {
     type: string;
-    width: number;
-    height: number;
-    fillColor: string;
+    fillColor?: string | undefined;
     strokeColor: string;
-    startX: number;
-    startY: number;
-    posX: number;
-    posY: number;
+    posX: number[];
+    posY: number[];
     lineWidth: number;
 }
