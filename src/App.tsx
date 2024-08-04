@@ -22,8 +22,6 @@ function App() {
         });
 
         socket.on('userLeft', (username) => {
-            console.log('User', username, 'left the room');
-
             deleteCurrentBoardUsers(username);
         });
 
@@ -41,8 +39,9 @@ function App() {
         });
 
         socket.on('cancelDraw', (message) => {
-            // if (message.figure.userId === user) return;
-
+            if (message.username === user) {
+                return;
+            }
             getDrawings(Number(message.id));
         });
     }, []);
@@ -53,7 +52,7 @@ function App() {
                     <Route path="/boards" element={<BoardsPage />} />
                     <Route path="/:id" element={<CanvasPage />} />
                     <Route path="/" element={<HomePage />} />
-                    <Route path="*" element={<Navigate to={`f${(+new Date()).toString(16)}`} />} />
+                    <Route path="*" element={<Navigate to={'/'} />} />
                 </Routes>
             </BrowserRouter>
         </div>

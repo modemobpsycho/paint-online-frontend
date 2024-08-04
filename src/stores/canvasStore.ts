@@ -231,7 +231,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
             get().socket.emit('cancelDraw', {
                 method: 'cancelDraw',
                 id: get().sessionId,
-                figure: get().drawings.slice(-1)[0]
+                figure: get().drawings.slice(-1)[0],
+                username: get().user
             });
         } catch (error) {
             console.log(error);

@@ -1,1 +1,1 @@
-export const API_URL = 'http://localhost:3000/api';
+export const API_URL = 'https://itra-task-6-backend.vercel.app/api';
