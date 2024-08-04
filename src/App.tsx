@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import './styles/app.scss';
 import BoardsPage from './pages/BoardsPage';
 import CanvasPage from './pages/CanvasPage';
@@ -47,14 +47,12 @@ function App() {
     }, []);
     return (
         <div className="app">
-            <BrowserRouter>
-                <Routes>
-                    <Route path="/boards" element={<BoardsPage />} />
-                    <Route path="/:id" element={<CanvasPage />} />
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="*" element={<Navigate to={'/'} />} />
-                </Routes>
-            </BrowserRouter>
+            <Routes>
+                <Route path="/boards" element={<BoardsPage />} />
+                <Route path="/:id" element={<CanvasPage />} />
+                <Route path="/" element={<HomePage />} />
+                <Route path="*" element={<Navigate to={'/'} />} />
+            </Routes>
         </div>
     );
 }

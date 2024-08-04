@@ -14,11 +14,7 @@ function Boards() {
     }, []);
 
     return (
-        <div
-            style={{
-                display: 'flex'
-            }}
-        >
+        <Box sx={{ display: 'flex' }}>
             <Box sx={{ padding: '20px', width: '100%' }}>
                 <Box
                     sx={{
@@ -48,7 +44,7 @@ function Boards() {
                                             sx={{ backgroundColor: '#363636' }}
                                             onClick={() => deleteBoard(Number(board.id))}
                                         >
-                                            <DeleteIcon sx={{ color: '#ffffff', fontSize: '20px' }} />
+                                            <DeleteIcon sx={{ color: 'white', fontSize: '20px' }} />
                                         </Button>
                                     )}
                                 </Box>
@@ -70,7 +66,7 @@ function Boards() {
                                             borderRadius: '10px',
                                             marginTop: '8vh'
                                         }}
-                                        onClick={() => navigate('/' + board.id)}
+                                        onClick={() => navigate(`/${board.id}`)}
                                     >
                                         Join Room
                                     </Button>
@@ -80,7 +76,7 @@ function Boards() {
                     ))}
                 </Box>
             </Box>
-        </div>
+        </Box>
     );
 }
 

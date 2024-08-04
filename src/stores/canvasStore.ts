@@ -210,7 +210,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     },
     tempDrawings: [],
     setTempDrawings: (drawings) => set({ tempDrawings: drawings }),
-    socket: io('http://localhost:3000'),
+    socket: io('https://itra-task-6-backend.vercel.app'),
     setSocket: (socket) => set({ socket: socket }),
     sessionId: '',
     setSessionId: (sessionId) => set({ sessionId: sessionId }),

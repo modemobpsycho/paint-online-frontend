@@ -40,7 +40,7 @@ export default function Toolbar() {
                 <HomeIcon />
             </button>
             <button
-                className={`toolbar__button ${selectedTool === 'Brush' ? 'toolbar__button--active' : ''} `}
+                className={`toolbar__button ${selectedTool === 'Brush' ? 'toolbar__button--active' : ''}`}
                 onClick={() => {
                     setTool(new Brush(canvas!, socket!, sessionId) as ITool);
                     setSelectedTool('Brush');
@@ -49,7 +49,7 @@ export default function Toolbar() {
                 <BrushIcon />
             </button>
             <button
-                className={`toolbar__button ${selectedTool === 'Rect' ? 'toolbar__button--active' : ''} `}
+                className={`toolbar__button ${selectedTool === 'Rect' ? 'toolbar__button--active' : ''}`}
                 onClick={() => {
                     setTool(new Rect(canvas!, socket!, sessionId) as ITool);
                     setSelectedTool('Rect');
@@ -58,7 +58,7 @@ export default function Toolbar() {
                 <BoxIcon />
             </button>
             <button
-                className={`toolbar__button ${selectedTool === 'Circle' ? 'toolbar__button--active' : ''} `}
+                className={`toolbar__button ${selectedTool === 'Circle' ? 'toolbar__button--active' : ''}`}
                 onClick={() => {
                     setTool(new Circle(canvas!, socket!, sessionId) as ITool);
                     setSelectedTool('Circle');
@@ -67,7 +67,7 @@ export default function Toolbar() {
                 <CircleIcon />
             </button>
             <button
-                className={`toolbar__button ${selectedTool === 'Eraser' ? 'toolbar__button--active' : ''} `}
+                className={`toolbar__button ${selectedTool === 'Eraser' ? 'toolbar__button--active' : ''}`}
                 onClick={() => {
                     setTool(new Eraser(canvas!, socket!, sessionId) as ITool);
                     setSelectedTool('Eraser');
@@ -85,7 +85,7 @@ export default function Toolbar() {
                 </svg>
             </button>
             <button
-                className={`toolbar__button ${selectedTool === 'Line' ? 'toolbar__button--active' : ''} `}
+                className={`toolbar__button ${selectedTool === 'Line' ? 'toolbar__button--active' : ''}`}
                 onClick={() => {
                     setTool(new Line(canvas!, socket!, sessionId) as ITool);
                     setSelectedTool('Line');
