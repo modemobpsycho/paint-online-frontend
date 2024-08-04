@@ -6,5 +6,6 @@ canvas {
     top: 100px;
     right: 20px;
     bottom: 20px;
-    background-color: white;
+    background-color: $white-color;
+    border: 1px solid $black-color;
 }

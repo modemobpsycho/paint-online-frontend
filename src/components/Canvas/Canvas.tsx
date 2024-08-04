@@ -7,7 +7,7 @@ import ITool from '../../types/tool.interface';
 import Brush from '../../tools/Brush';
 
 export default function Canvas() {
-    const { setCanvas, pushToUndo, user, socket, setSessionId, getBoard, deleteCurrentBoardUsers } = useCanvasStore(
+    const { setCanvas, user, socket, setSessionId, getBoard, deleteCurrentBoardUsers, getDrawings } = useCanvasStore(
         (state) => state
     );
     const { setTool } = useToolStore((state) => state);
@@ -35,6 +35,8 @@ export default function Canvas() {
 
         window.addEventListener('resize', () => {
             setCanvasSize({ width: window.innerWidth, height: window.innerHeight - 80 });
+
+            getDrawings(Number(params.id!));
         });
 
         return () => {
@@ -46,18 +48,9 @@ export default function Canvas() {
         };
     }, []);
 
-    const mouseDownHandler = () => {
-        pushToUndo(canvasRef.current!.toDataURL());
-    };
-
     return (
         <div className="canvas">
-            <canvas
-                onMouseDown={mouseDownHandler}
-                ref={canvasRef}
-                width={canvasSize.width}
-                height={canvasSize.height}
-            />
+            <canvas ref={canvasRef} width={canvasSize.width} height={canvasSize.height} />
         </div>
     );
 }

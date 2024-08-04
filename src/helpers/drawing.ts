@@ -1,7 +1,6 @@
 import useToolStore from '../stores/toolStore';
 import Brush from '../tools/Brush';
 import Circle from '../tools/Circle';
-import Eraser from '../tools/Eraser';
 import Line from '../tools/Line';
 import Rect from '../tools/Rect';
 import Tool from '../tools/Tool';
@@ -17,6 +16,7 @@ export const useDrawHandler = () => {
         switch (figure.type) {
             case 'brush':
                 Brush.staticDraw(figure.posX, figure.posY, figure.strokeColor, figure.lineWidth);
+                setOptions();
                 break;
             case 'rect':
                 Rect.staticDraw(
@@ -51,9 +51,6 @@ export const useDrawHandler = () => {
                     figure.lineWidth
                 );
                 setOptions();
-                break;
-            case 'eraser':
-                Eraser.staticDrawEraser(figure.posX.at(-1) as number, figure.posY.at(-1) as number, figure.lineWidth);
                 break;
             case 'finish':
                 Tool.ctx!.beginPath();

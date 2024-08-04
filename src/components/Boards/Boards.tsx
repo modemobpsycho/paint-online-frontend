@@ -43,8 +43,12 @@ function Boards() {
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                     <Typography variant="h6">{board.name}</Typography>
                                     {board.creator === user && (
-                                        <Button onClick={() => deleteBoard(Number(board.id))}>
-                                            <DeleteIcon sx={{ color: 'black', fontSize: '20px' }} />
+                                        <Button
+                                            variant="contained"
+                                            sx={{ backgroundColor: '#363636' }}
+                                            onClick={() => deleteBoard(Number(board.id))}
+                                        >
+                                            <DeleteIcon sx={{ color: '#ffffff', fontSize: '20px' }} />
                                         </Button>
                                     )}
                                 </Box>

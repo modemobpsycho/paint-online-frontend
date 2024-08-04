@@ -6,13 +6,12 @@ const canvasMath = {
     },
 
     getWidth(x1: number, x2: number) {
-        const width: number = Math.abs(x1 - x2);
+        const width: number = x1 - x2;
         return width;
     },
 
     getHeight(y1: number, y2: number) {
-        const height: number = Math.abs(y1 - y2);
-
+        const height: number = y1 - y2;
         return height;
     }
 };

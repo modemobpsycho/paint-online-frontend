@@ -75,7 +75,6 @@ export default class Brush extends Tool {
 
         Brush.ctx!.beginPath();
         Brush.ctx!.moveTo(x[0], y[0]);
-        console.log('------' + x.length);
         x.forEach((x, i) => {
             Brush.ctx!.lineTo(x, y[i]);
             Brush.ctx!.stroke();

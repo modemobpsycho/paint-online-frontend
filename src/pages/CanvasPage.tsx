@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect } from 'react';
 import Canvas from '../components/Canvas/Canvas';
 import SettingBar from '../components/SettingBar/SettingBar';

@@ -2,13 +2,11 @@
 
 .toolbar {
     height: $toolbar-height;
-    background-color: rgb(216, 216, 216);
+    background-color: $background-bar;
     display: flex;
     align-items: center;
     position: absolute;
     width: 100%;
-    box-shadow: 0 4px 5px gray;
-
     border-bottom: 1px solid $primary-color;
     z-index: 999;
 
@@ -16,25 +14,37 @@
         height: $toolbar-height;
         width: $toolbar-height;
         background-color: transparent;
+        color: $button-color;
         margin-left: 10px;
         border: none;
         outline: none;
         cursor: pointer;
+        border-radius: 8px;
+
         &:hover {
-            background-color: gray;
-            transition: 0.3s;
+            background-color: $button-color-active;
+            color: $button-background-active;
+            transition: 0.2s;
+        }
+
+        &--active {
+            background-color: $button-color-active;
+            color: $button-background-active;
+            border: 1px solid $button-border-active;
+            border-radius: 8px;
         }
     }
 }
 
 .setting-bar {
     height: $toolbar-height;
-    background-color: rgb(216, 216, 216);
+    background-color: $background-bar;
     display: flex;
     align-items: center;
     position: absolute;
+    color: $button-color;
     width: 100%;
-    box-shadow: 0 4px 5px gray;
+    box-shadow: 0 4px 5px #0d0d0d;
     top: $toolbar-height;
     z-index: 998;
     border-bottom: 1px solid $primary-color;

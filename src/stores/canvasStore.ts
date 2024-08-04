@@ -9,94 +9,62 @@ import Rect from '../tools/Rect';
 import Circle from '../tools/Circle';
 import canvasMath from '../helpers/canvasMath';
 import Line from '../tools/Line';
-import Eraser from '../tools/Eraser';
 import Tool from '../tools/Tool';
 import useToolStore from './toolStore';
 
 interface CanvasState {
     canvas: HTMLCanvasElement | null;
-    undoList: string[];
-    redoList: string[];
-    boardNameAdd: string;
-    board: IBoard | null;
-    isUsernameModal: boolean;
-    isBoardModal: boolean;
+    setCanvas: (canvas: HTMLCanvasElement) => void;
     user: string;
     currentBoardUsers: string[];
-    socket: Socket;
-    sessionId: string;
-    boards: IBoard[];
-    drawings: IFigure[];
-    getDrawings: (boardId: number) => void;
-    setDrawings: (drawings: IFigure[]) => void;
-    addDrawing: (drawing: IFigure) => void;
-    deleteAllDrawings: () => void;
-    undo: () => void;
-    redo: () => void;
     setUsername: (username: string) => void;
-    setBoardNameAdd: (board: string) => void;
-    setIsUsernameModal: (isUsernameModal: boolean) => void;
-    setIsBoardModal: (isBoardModal: boolean) => void;
     setUser: () => void;
     setCurrentBoardUsers: (user: string) => void;
     deleteCurrentBoardUsers: (userName: string) => void;
-    leaveBoard: () => void;
-    setSocket: (socket: Socket) => void;
-    setSessionId: (sessionId: string) => void;
-    setCanvas: (canvas: HTMLCanvasElement) => void;
-    pushToUndo: (data: string) => void;
-    pushToRedo: (data: string) => void;
+    board: IBoard | null;
+    boards: IBoard[];
+    boardNameAdd: string;
     getBoard: () => void;
     deleteBoard: (id: number) => void;
     setBoards: () => void;
     addBoard: () => void;
+    setBoardNameAdd: (board: string) => void;
+    drawings: IFigure[];
+    tempDrawings: IFigure[];
+    getDrawings: (boardId: number) => void;
+    setDrawings: (drawings: IFigure[]) => void;
+    addDrawing: (drawing: IFigure) => void;
+    deleteAllDrawings: () => void;
+    setTempDrawings: (drawings: IFigure[]) => void;
+    isUsernameModal: boolean;
+    isBoardModal: boolean;
+    setIsUsernameModal: (isUsernameModal: boolean) => void;
+    setIsBoardModal: (isBoardModal: boolean) => void;
+    socket: Socket;
+    sessionId: string;
+    setSocket: (socket: Socket) => void;
+    setSessionId: (sessionId: string) => void;
+    undo: () => void;
+    redo: () => void;
 }
 
 export const useCanvasStore = create<CanvasState>((set, get) => ({
     canvas: null,
-    undoList: [],
-    redoList: [],
     setCanvas: (canvas) => set({ canvas: canvas }),
-    pushToUndo(data: string) {
-        get().undoList.push(data);
-    },
-    pushToRedo(data: string) {
-        get().redoList.push(data);
-    },
-    undo() {
-        const ctx = get().canvas!.getContext('2d');
-        if (get().undoList.length > 0) {
-            const dataUrl = get().undoList.pop() as string;
-            get().redoList.push(dataUrl);
-            const img = new Image();
-            img.src = dataUrl;
-            img.onload = () => {
-                ctx!.clearRect(0, 0, get().canvas!.width, get().canvas!.height);
-                ctx!.drawImage(img, 0, 0, get().canvas!.width, get().canvas!.height);
-            };
-        } else {
-            ctx!.clearRect(0, 0, get().canvas!.width, get().canvas!.height);
-        }
-    },
-    redo() {
-        const ctx = get().canvas?.getContext('2d');
-        if (get().redoList.length > 0) {
-            const dataUrl = get().redoList.pop() as string;
-            get().redoList.push(get().canvas?.toDataURL() as string);
-            const img = new Image();
-            img.src = dataUrl;
-            img.onload = () => {
-                ctx!.clearRect(0, 0, get().canvas!.width, get().canvas!.height);
-                ctx!.drawImage(img, 0, 0, get().canvas!.width, get().canvas!.height);
-            };
-        }
-    },
-    isUsernameModal: false,
-    setIsUsernameModal: (isUsernameModal) => set({ isUsernameModal }),
-    isBoardModal: false,
-    setIsBoardModal: (isBoardModal) => set({ isBoardModal }),
     user: localStorage.getItem('username') || '',
     currentBoardUsers: [],
+    setUsername: (username) => set({ user: username }),
+    setUser: async () => {
+        try {
+            const { data } = await axios.post<{ id: number }>(API_URL + '/user', {
+                username: get().user
+            });
+            localStorage.setItem('username', get().user);
+            localStorage.setItem('id', String(data.id));
+        } catch (error) {
+            console.log(error);
+        }
+    },
     setCurrentBoardUsers: (user: string) => {
         if (!get().currentBoardUsers.includes(user)) {
             set((state) => ({ currentBoardUsers: [...state.currentBoardUsers, user] }));
@@ -105,8 +73,47 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     deleteCurrentBoardUsers: (userName) => {
         set({ currentBoardUsers: get().currentBoardUsers.filter((user) => user !== userName) });
     },
-    leaveBoard: () => {
-        set({ currentBoardUsers: [] });
+    boardNameAdd: '',
+    board: null,
+    setBoardNameAdd: (board) => set({ boardNameAdd: board }),
+    getBoard: async () => {
+        try {
+            const response = await axios.get(API_URL + '/board/' + get().sessionId);
+            set({ board: response.data });
+            get().setTempDrawings([]);
+        } catch (error) {
+            console.error('Error with getting board:', error);
+        }
+    },
+    deleteBoard: async (id) => {
+        try {
+            const response = await axios.delete(API_URL + '/board/' + id);
+            set({ boards: get().boards.filter((board) => board.id !== response.data.id) });
+        } catch (error) {
+            console.error('Error with deleting board:', error);
+        }
+    },
+    boards: [],
+    setBoards: async () => {
+        try {
+            const response = await axios.get(API_URL + '/boards');
+            const boardsData = response.data;
+            set({ boards: boardsData });
+        } catch (error) {
+            console.error('Error with getting boards:', error);
+        }
+    },
+    addBoard: async () => {
+        try {
+            const response = await axios.post(API_URL + '/board', {
+                name: get().boardNameAdd,
+                creator: get().user
+            });
+
+            set({ boards: [...get().boards, response.data] });
+        } catch (error) {
+            console.error('Error with adding board:', error);
+        }
     },
     drawings: [],
     setDrawings: (drawings) => {
@@ -118,8 +125,11 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
                 const response = await axios.get(API_URL + '/board/' + boardId + '/drawings/');
                 const data = await response.data;
                 set({ drawings: data });
+
                 const { setOptions } = useToolStore.getState();
-                response.data.forEach((figure: IFigure) => {
+                const context = get().canvas!.getContext('2d');
+                context!.clearRect(0, 0, get().canvas!.width, get().canvas!.height);
+                get().drawings.forEach((figure: IFigure) => {
                     switch (figure.type) {
                         case 'brush':
                             Brush.staticDraw(figure.posX, figure.posY, figure.strokeColor, figure.lineWidth);
@@ -158,13 +168,6 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
                                 figure.lineWidth
                             );
                             setOptions();
-                            break;
-                        case 'eraser':
-                            Eraser.staticDrawEraser(
-                                figure.posX.slice(-1)[0],
-                                figure.posY.slice(-1)[0],
-                                figure.lineWidth
-                            );
                             break;
                         case 'finish':
                             Tool.ctx!.beginPath();
@@ -205,62 +208,56 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
             console.log(error);
         }
     },
-    setUsername: (username) => set({ user: username }),
-    setUser: async () => {
-        try {
-            const { data } = await axios.post<{ id: number }>(API_URL + '/user', {
-                username: get().user
-            });
-            localStorage.setItem('username', get().user);
-            localStorage.setItem('id', String(data.id));
-        } catch (error) {
-            console.log(error);
-        }
-    },
+    tempDrawings: [],
+    setTempDrawings: (drawings) => set({ tempDrawings: drawings }),
     socket: io('http://localhost:3000'),
     setSocket: (socket) => set({ socket: socket }),
     sessionId: '',
     setSessionId: (sessionId) => set({ sessionId: sessionId }),
-    boardNameAdd: '',
-    board: null,
-    setBoardNameAdd: (board) => set({ boardNameAdd: board }),
-    getBoard: async () => {
+    isUsernameModal: false,
+    setIsUsernameModal: (isUsernameModal) => set({ isUsernameModal }),
+    isBoardModal: false,
+    setIsBoardModal: (isBoardModal) => set({ isBoardModal }),
+    undo: async () => {
         try {
-            const response = await axios.get(API_URL + '/board/' + get().sessionId);
-            set({ board: response.data });
-        } catch (error) {
-            console.error('Error with getting board:', error);
-        }
-    },
-    deleteBoard: async (id) => {
-        try {
-            const response = await axios.delete(API_URL + '/board/' + id);
-            set({ boards: get().boards.filter((board) => board.id !== response.data.id) });
-        } catch (error) {
-            console.error('Error with deleting board:', error);
-        }
-    },
-    boards: [],
-    setBoards: async () => {
-        try {
-            const response = await axios.get(API_URL + '/boards');
-            const boardsData = response.data;
-            set({ boards: boardsData });
-        } catch (error) {
-            console.error('Error with getting boards:', error);
-        }
-    },
-    addBoard: async () => {
-        try {
-            const response = await axios.post(API_URL + '/board', {
-                name: get().boardNameAdd,
-                creator: get().user
-            });
+            if (!get().drawings.length) return;
 
-            set({ boards: [...get().boards, response.data] });
-            console.log('Новый борд успешно создан:', response.data);
+            const response = await axios.delete(API_URL + '/board/deletedraw/' + get().board?.id + '/' + get().user);
+            const deletedDrawing = response.data;
+
+            get().setTempDrawings([...get().tempDrawings, deletedDrawing]);
+            get().getDrawings(Number(get().sessionId));
+
+            get().socket.emit('cancelDraw', {
+                method: 'cancelDraw',
+                id: get().sessionId,
+                figure: get().drawings.slice(-1)[0]
+            });
         } catch (error) {
-            console.error('Ошибка при создании нового борда:', error);
+            console.log(error);
+        }
+    },
+    redo: async () => {
+        try {
+            if (!get().tempDrawings.length) return;
+            const response = await axios.post(
+                API_URL + '/board/postdraw/' + get().board?.id + '/' + get().user,
+                get().tempDrawings[get().tempDrawings.length - 1]
+            );
+
+            const addedDrawing = response.data;
+
+            get().setTempDrawings([...get().tempDrawings.slice(0, -1)]);
+            get().setDrawings([...get().drawings, addedDrawing]);
+            get().getDrawings(Number(get().sessionId));
+
+            get().socket.emit('draw', {
+                method: 'draw',
+                id: get().sessionId,
+                figure: addedDrawing
+            });
+        } catch (error) {
+            console.log(error);
         }
     }
 }));

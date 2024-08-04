@@ -7,11 +7,4 @@ export default class Eraser extends Brush {
         super(canvas, socket, sessionId);
         toolStrokeColor('#FFFFFF');
     }
-
-    static staticDrawEraser(x: number, y: number, lineWidth: number) {
-        Eraser.ctx!.strokeStyle = '#FFFFFF';
-        Eraser.ctx!.lineWidth = lineWidth;
-        Eraser.ctx!.lineTo(x, y);
-        Eraser.ctx!.stroke();
-    }
 }

@@ -8,7 +8,9 @@ import useCanvasStore from './stores/canvasStore';
 import { useDrawHandler } from './helpers/drawing';
 
 function App() {
-    const { user, socket, setCurrentBoardUsers, deleteCurrentBoardUsers } = useCanvasStore((state) => state);
+    const { user, socket, setCurrentBoardUsers, deleteCurrentBoardUsers, getDrawings } = useCanvasStore(
+        (state) => state
+    );
     const drawHandler = useDrawHandler();
     useEffect(() => {
         socket.on('userJoined', (username) => {
@@ -26,8 +28,6 @@ function App() {
         });
 
         socket.on('passUserInfo', (username) => {
-            console.log('User', username, 'pass');
-
             setCurrentBoardUsers(username);
         });
 
@@ -36,9 +36,14 @@ function App() {
         });
 
         socket.on('draw', (message) => {
-            console.log(message.user === user);
             if (message.user === user) return;
             drawHandler(message);
+        });
+
+        socket.on('cancelDraw', (message) => {
+            // if (message.figure.userId === user) return;
+
+            getDrawings(Number(message.id));
         });
     }, []);
     return (

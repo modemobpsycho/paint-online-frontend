@@ -27,9 +27,7 @@ export const useToolStore = create<ToolState>((set, get) => ({
     setTool: (tool) => {
         if (tool instanceof Eraser) {
             set({ tempStrokeColor: get().strokeColor });
-            console.log('--------------------' + get().tempStrokeColor, get().strokeColor);
         } else {
-            console.log('+++++++++++' + get().tempStrokeColor, get().strokeColor);
             get().setStrokeColor(get().tempStrokeColor);
         }
         set({ tool: tool });
@@ -43,9 +41,7 @@ export const useToolStore = create<ToolState>((set, get) => ({
     setStrokeColor: (color) => {
         if (!(get().tool instanceof Eraser)) {
             Tool.setStrokeColor(color);
-            console.log(1);
         }
-        console.log(2);
         set({ strokeColor: color, tempStrokeColor: color });
     },
 
@@ -74,6 +70,5 @@ export const useToolStore = create<ToolState>((set, get) => ({
 export default useToolStore;
 
 export const toolStrokeColor = (color: string) => {
-    // useToolStore.getState().setStrokeColor(color);
     Tool.setStrokeColor(color);
 };
