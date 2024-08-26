@@ -61,7 +61,7 @@ function BoardsPage() {
             />
             <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <img
-                    src="assets/logo.png"
+                    src="/assets/logo.png"
                     alt="logo"
                     style={{
                         height: '60px',

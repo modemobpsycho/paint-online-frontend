@@ -210,7 +210,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     },
     tempDrawings: [],
     setTempDrawings: (drawings) => set({ tempDrawings: drawings }),
-    socket: io('https://itra-task-6-backend.vercel.app'),
+    socket: io('https://paint-online-backend-0xmk.onrender.com'),
     setSocket: (socket) => set({ socket: socket }),
     sessionId: '',
     setSessionId: (sessionId) => set({ sessionId: sessionId }),

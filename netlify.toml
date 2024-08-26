@@ -1,0 +1,9 @@
+# example netlify.toml
+[build]
+  publish = "dist"
+  command = "npm i && npm run build"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

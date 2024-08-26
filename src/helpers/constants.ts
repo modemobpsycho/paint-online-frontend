@@ -1,1 +1,1 @@
-export const API_URL = 'https://itra-task-6-backend.vercel.app/api';
+export const API_URL = 'https://paint-online-backend-0xmk.onrender.com/api';
